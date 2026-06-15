@@ -27,15 +27,14 @@ const score = computed(() => {
   return s
 })
 
-const level = computed(() => {
-  const levels = [
-    { key: 'weak',   label: 'Weak' },
-    { key: 'fair',   label: 'Fair' },
-    { key: 'good',   label: 'Good' },
-    { key: 'strong', label: 'Strong' },
-  ]
-  return levels[Math.max(0, score.value - 1)]
-})
+const levels = [
+  { key: 'weak',   label: 'Weak' },
+  { key: 'fair',   label: 'Fair' },
+  { key: 'good',   label: 'Good' },
+  { key: 'strong', label: 'Strong' },
+] as const
+
+const level = computed(() => levels[Math.max(0, score.value - 1)] as { key: string; label: string })
 
 function barClass(n: number) {
   if (n > score.value) return ''

@@ -106,7 +106,7 @@ function next() {
 const CARD_W = 260
 const GAP = 60
 
-function cardStyle(i: number) {
+function cardStyle(i: number): Record<string, string | number> {
   const offset = i - current.value
   const abs = Math.abs(offset)
 
@@ -114,13 +114,11 @@ function cardStyle(i: number) {
   const tz = abs === 0 ? 0 : -abs * 100
   const ry = offset === 0 ? 0 : offset < 0 ? 42 : -42
   const scale = offset === 0 ? 1 : Math.max(0.68, 1 - abs * 0.15)
-  const opacity = abs > 2 ? 0 : 1
-  const zIndex = 20 - abs
 
   return {
     transform: `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
-    zIndex,
-    opacity,
+    zIndex: 20 - abs,
+    opacity: abs > 2 ? 0 : 1,
     pointerEvents: abs > 2 ? 'none' : 'auto',
   }
 }
