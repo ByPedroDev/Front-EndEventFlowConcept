@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import NavHeader from '@/components/NavHeader.vue'
 import HeroSection from '@/components/HeroSection.vue'
+import StatsBar from '@/components/StatsBar.vue'
 import SearchBar from '@/components/SearchBar.vue'
 import SpeakersSection from '@/components/SpeakersSection.vue'
 import EventsGrid from '@/components/EventsGrid.vue'
@@ -12,6 +13,7 @@ import FooterSection from '@/components/FooterSection.vue'
     <NavHeader />
     <main>
       <HeroSection />
+      <StatsBar />
       <SearchBar />
       <SpeakersSection />
       <EventsGrid />
