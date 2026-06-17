@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header :class="{ hidden }" @mouseenter="hidden = false">
     <div class="nav-inner">
       <RouterLink to="/" class="logo">EventFlow<span class="logo-dot">.</span></RouterLink>
 
@@ -55,12 +55,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
 
 const { isDark, toggle } = useTheme()
 const menuOpen = ref(false)
+const hidden = ref(false)
+
+let lastY = 0
+function onScroll() {
+  const y = window.scrollY
+  hidden.value = y > lastY && y > 80
+  lastY = y
+}
+
+onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }))
+onUnmounted(() => window.removeEventListener('scroll', onScroll))
 </script>
 
 <style scoped>
@@ -71,7 +82,11 @@ header {
   background: var(--bg-nav);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
-  transition: var(--transition-theme);
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), var(--transition-theme);
+}
+
+header.hidden {
+  transform: translateY(-100%);
 }
 
 .nav-inner {

@@ -27,16 +27,21 @@ import FooterSection from '@/components/FooterSection.vue'
 
 <style scoped>
 main {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  display: block;
   padding: 1.5rem 0;
+}
+
+main > * + * {
+  margin-top: 1.5rem;
 }
 
 @media (max-width: 768px) {
   main {
-    gap: 1rem;
-    padding: 1rem 1.2rem;
+    padding: 1rem 0;
+  }
+
+  main > * + * {
+    margin-top: 1rem;
   }
 }
 

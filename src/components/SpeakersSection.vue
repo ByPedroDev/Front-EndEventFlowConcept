@@ -3,9 +3,9 @@
     <div class="section-inner">
       <div class="section-header">
         <div>
-          <div class="section-label">— Keynote Lineup</div>
-          <h2>Featured Speakers</h2>
-          <p>World-class thinkers shaping tomorrow's agenda</p>
+          <div class="section-label">— Highlights</div>
+          <h2>Featured Events</h2>
+          <p>Don't miss the experiences everyone is talking about</p>
         </div>
         <a href="#" class="view-all">
           View All
@@ -16,24 +16,33 @@
 
     <div class="coverflow-scene" @keydown.left="prev" @keydown.right="next" tabindex="0">
       <div class="coverflow-track">
-        <div
-          v-for="(speaker, i) in speakers"
-          :key="speaker.name"
+        <RouterLink
+          v-for="(event, i) in events"
+          :key="event.id"
+          :to="`/events/${event.id}`"
           class="speaker-card"
           :class="{ active: i === current }"
           :style="cardStyle(i)"
-          @click="current = i"
+          @click.prevent="i !== current ? (current = i) : undefined"
         >
           <div class="card-img">
-            <img :src="speaker.img" :alt="speaker.name" />
+            <img :src="event.img" :alt="event.title" />
             <div class="card-img-fade"></div>
+            <div class="card-date-badge">
+              <div class="day">{{ event.day }}</div>
+              <div class="month">{{ event.month }}</div>
+            </div>
           </div>
           <div class="card-body">
-            <div class="card-name">{{ speaker.name }}</div>
-            <div class="card-role">{{ speaker.role }}</div>
-            <div class="card-topic">{{ speaker.topic }}</div>
+            <div class="card-cat">{{ event.category }}</div>
+            <div class="card-name">{{ event.title }}</div>
+            <div class="card-role">
+              <span class="material-symbols-outlined">location_on</span>
+              {{ event.location }}
+            </div>
+            <div class="card-topic">{{ event.price }}</div>
           </div>
-        </div>
+        </RouterLink>
       </div>
     </div>
 
@@ -43,7 +52,7 @@
       </button>
       <div class="nav-dots">
         <span
-          v-for="(_, i) in speakers"
+          v-for="(_, i) in events"
           :key="i"
           class="dot"
           :class="{ active: i === current }"
@@ -59,60 +68,79 @@
 
 <script setup lang="ts">
 import { ref, onUnmounted } from 'vue'
+import { RouterLink } from 'vue-router'
 
-const speakers = [
+const events = [
   {
-    name: 'Dr. Sarah Chen',
-    role: 'Chief AI Officer · DeepMind',
-    topic: '🧠 The Conscious Machine',
-    img: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop&crop=face',
+    id: 1,
+    title: 'Advanced Design Systems Workshop',
+    category: 'Workshop',
+    location: 'Creative Hub, Berlin',
+    day: '24',
+    month: 'OCT',
+    price: '€ 299',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVEXg69OmBIJtNR3IqF1IkrG0CPH2_0Af1rDEpfFzWn9voZFzWNCB1R5POLYYpbboBouxizZ8P6k4NHTrZak33yii-oVxOMssEdiOAqlggWHEKK0KSCR4KELWJJlFRHDKvRQbxMXsYMNx_IperD-GBqzD234n5XE_5T0lF4ARrRe1kPMoCD-nOvd6Bu7lGC1qS91FL0thAzJG0VQSA4Np-Zyq76T4xIdeuuTAMt-h3O8UIDUTRvSJZTCzeST24FFlnIgTJ9CTYJL4W',
   },
   {
-    name: 'Marcus Adeyemi',
-    role: 'Founder & CEO · Nexus Capital',
-    topic: '💹 Web3 & Financial Futures',
-    img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face',
+    id: 2,
+    title: 'Digital Arts & Music Expo',
+    category: 'Festival',
+    location: 'Sonar Dome, Barcelona',
+    day: '12',
+    month: 'NOV',
+    price: '€ 120',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnprHnhI17hC3LiratNtLycBIVDQkMPpemyQu_MIyksZ3O5E4hl9uyYPsE08h-ddOJSdF8Bomk5wHmYdkInUp9sBSKqCYbtng6GQPM778EwNkKx1zwgjn6JZpTsbc4orZMKpFJIsYxB7b0pHvzigLY1Vkvptnz4XLsgmzQd0vauHmJfSRkC9R7_KjLA2pPy-twxAGgk_yjEFSCLpRyt_wM_Ol3_AVSkURz476RK9C9De6YBnhMY2ow5p8QFt-Bb-yJkKzhCv1NnNeG',
   },
   {
-    name: 'Yuki Tanaka',
-    role: 'Design Director · Apple',
-    topic: '✦ Spatial Computing UX',
-    img: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=400&h=400&fit=crop&crop=face',
+    id: 3,
+    title: 'Executive Leadership Summit',
+    category: 'Conference',
+    location: 'The Ritz, London',
+    day: '05',
+    month: 'DEC',
+    price: '£ 850',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0EsVhNFiWT3J7WpYLxmSsuv8-P65nhn0BBap0n0getaLzYtO20RyZElA30hjaWsV_ArRUP_VEXAu2Lu_TbwPLpfDaf5WmoPnMXoFOMPGitWcFzN4BQx6CkHmHHrTiqZlpk0Ep2M8uUIvpVB-SP-kNuEmxBA5DW0HuHfnFUiyZNry9JlYFg6ad4gFz2UXCe-63xzbXaGjgxn7DUH8JoVCF1pZBa3SGiI962Mp7pnSd1gPAB65MSK52Iovms1qxfuu3xhRfdIf0aJkI',
   },
   {
-    name: 'Elena Russo',
-    role: 'Partner · Sequoia Capital',
-    topic: '🚀 Scaling to a Billion',
-    img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face',
+    id: 4,
+    title: "Founder's Supper Club",
+    category: 'Networking',
+    location: 'SOHO House, NYC',
+    day: '18',
+    month: 'JAN',
+    price: '$ 180',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAOtsljKnV__vIzi1tQZ442lzSofmbhfovLTbHd1qpASPEbXUhVqNhm3WAnf5dAY5yScY6Jld3borL5HU4lYqmb0qnc-ugwSe9OqvUXMUT8YFWGaYbMhl_ip6BSSQDps1hqXG7zh2msTFQ9na7SZxkhspkdag4gC2pFQzlx84BslzXrFJ-APF9_d0Igrcb4j2jNiS4ElBhs5fKCi-0hoZ1C-NisIYYcKTW2B8MtH8wYXOpodnFNe2R0BPDBOoz',
   },
   {
-    name: 'James Okafor',
-    role: 'CTO · Stripe',
-    topic: '⚡ Payments Infrastructure',
-    img: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face',
+    id: 5,
+    title: 'Startup of the Year Awards',
+    category: 'Celebration',
+    location: 'Sky Garden, Seoul',
+    day: '02',
+    month: 'FEB',
+    price: 'Free',
+    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgPxSVs1N7xDQRwybwo6MRhWBsIoVQIzGKy45fogShQG1WI-AjkQOg8ZxRjP6qM7kF7RX78T_16gvYHToLgxBqylPHDMFX5P9nL5Vw7rmCK97moxiGo1aZcUGu_7X-7asYb9DGFixDQEq-QlhULAzhMCOZqhcYAlkDzwyhrUFYxnKcLN7YoMhrg3QIvQz1ayY1zNBOd8cpNI_gMGzKpMAwRYepbCFVNiznM-s1sV9mY4ZeszA7ZjPMmG5lfokpW_y0hzDY4ZN7ZvTH',
   },
 ]
 
 const current = ref(2)
 
 function prev() {
-  current.value = (current.value - 1 + speakers.length) % speakers.length
+  current.value = (current.value - 1 + events.length) % events.length
 }
-
 function next() {
-  current.value = (current.value + 1) % speakers.length
+  current.value = (current.value + 1) % events.length
 }
 
 const isMobile = ref(window.innerWidth <= 640)
-
 const onResize = () => { isMobile.value = window.innerWidth <= 640 }
 window.addEventListener('resize', onResize)
 onUnmounted(() => window.removeEventListener('resize', onResize))
 
-const CARD_W = 260
-const GAP = 60
-const CARD_W_MOBILE = 200
-const GAP_MOBILE = 24
+const CARD_W = 320
+const GAP = 80
+const CARD_W_MOBILE = 220
+const GAP_MOBILE = 28
 
 function cardStyle(i: number): Record<string, string | number> {
   const offset = i - current.value
@@ -131,10 +159,10 @@ function cardStyle(i: number): Record<string, string | number> {
     }
   }
 
-  const tx = offset * (CARD_W * 0.58 + GAP)
-  const tz = abs === 0 ? 0 : -abs * 100
-  const ry = offset === 0 ? 0 : offset < 0 ? 42 : -42
-  const scale = offset === 0 ? 1 : Math.max(0.68, 1 - abs * 0.15)
+  const tx = offset * (CARD_W * 0.52 + GAP)
+  const tz = abs === 0 ? 0 : -abs * 120
+  const ry = offset === 0 ? 0 : offset < 0 ? 38 : -38
+  const scale = offset === 0 ? 1 : Math.max(0.7, 1 - abs * 0.13)
 
   return {
     transform: `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
@@ -198,20 +226,15 @@ function cardStyle(i: number): Record<string, string | number> {
   white-space: nowrap;
 }
 
-.view-all .material-symbols-outlined {
-  font-size: 1rem;
-}
-
-.view-all:hover {
-  gap: 0.6rem;
-}
+.view-all .material-symbols-outlined { font-size: 1rem; }
+.view-all:hover { gap: 0.6rem; }
 
 /* ── Coverflow scene ── */
 .coverflow-scene {
   position: relative;
   width: 100%;
-  height: 420px;
-  perspective: 1100px;
+  height: 500px;
+  perspective: 1400px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,12 +254,15 @@ function cardStyle(i: number): Record<string, string | number> {
 /* ── Cards ── */
 .speaker-card {
   position: absolute;
-  width: 260px;
+  width: 320px;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 20px;
   overflow: hidden;
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
   transition:
     transform 0.55s cubic-bezier(0.25, 0.46, 0.45, 0.94),
     opacity 0.4s,
@@ -257,11 +283,12 @@ function cardStyle(i: number): Record<string, string | number> {
     0 0 0 1px var(--emerald-border),
     0 30px 80px rgba(0, 0, 0, 0.9),
     0 0 60px rgba(16, 185, 129, 0.2);
+  cursor: default;
 }
 
 .card-img {
   position: relative;
-  height: 200px;
+  height: 240px;
   overflow: hidden;
 }
 
@@ -269,8 +296,12 @@ function cardStyle(i: number): Record<string, string | number> {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top;
   display: block;
+  transition: transform 0.5s ease;
+}
+
+.speaker-card.active .card-img img {
+  transform: scale(1.05);
 }
 
 .card-img-fade {
@@ -280,22 +311,73 @@ function cardStyle(i: number): Record<string, string | number> {
   transition: var(--transition-theme);
 }
 
+.card-date-badge {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.25rem 0.55rem;
+  text-align: center;
+}
+
+.card-date-badge .day {
+  font-family: 'Syne', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--emerald);
+  line-height: 1;
+}
+
+.card-date-badge .month {
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+}
+
 .card-body {
   padding: 1.2rem 1.4rem 1.5rem;
+}
+
+.card-cat {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--emerald);
+  margin-bottom: 0.4rem;
 }
 
 .card-name {
   font-family: 'Syne', sans-serif;
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: var(--text);
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.35rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card-role {
-  font-size: 0.78rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.card-role .material-symbols-outlined {
+  font-size: 0.85rem;
+  color: var(--emerald);
 }
 
 .card-topic {
@@ -303,10 +385,10 @@ function cardStyle(i: number): Record<string, string | number> {
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.45rem 0.8rem;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
   color: var(--emerald);
-  font-weight: 600;
-  letter-spacing: 0.03em;
   transition: background 0.3s, border-color 0.3s;
 }
 
@@ -316,9 +398,7 @@ function cardStyle(i: number): Record<string, string | number> {
 }
 
 @media (max-width: 640px) {
-  .section-inner {
-    padding: 0 1.2rem;
-  }
+  .section-inner { padding: 0 1.2rem; }
 
   .section-header {
     flex-direction: column;
@@ -328,8 +408,8 @@ function cardStyle(i: number): Record<string, string | number> {
   }
 
   .coverflow-scene {
-    height: 340px;
-    perspective: 600px;
+    height: 400px;
+    perspective: 800px;
   }
 }
 
@@ -356,10 +436,7 @@ function cardStyle(i: number): Record<string, string | number> {
   transition: all 0.2s;
 }
 
-.nav-btn .material-symbols-outlined {
-  font-size: 1.3rem;
-}
-
+.nav-btn .material-symbols-outlined { font-size: 1.3rem; }
 .nav-btn:hover {
   border-color: var(--emerald-border);
   color: var(--emerald);
