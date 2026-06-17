@@ -381,7 +381,7 @@ const allEvents = [
   },
 ]
 
-const event = computed(() => allEvents.find(e => e.id === id) ?? allEvents[0])
+const event = computed(() => allEvents.find(e => e.id === id) ?? allEvents[0]!)
 
 function handleRegister() {
   console.log('Register for event:', event.value.id)
