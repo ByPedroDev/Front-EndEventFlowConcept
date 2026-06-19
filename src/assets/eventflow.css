@@ -1,0 +1,195 @@
+/* EventFlow Global Styles & Tokens */
+
+:root {
+  --bg: #0a0f0d;
+  --bg-card: #111712;
+  --bg-elevated: #161d18;
+  --bg-nav: rgba(10, 15, 13, 0.82);
+  --bg-badge: rgba(10, 15, 13, 0.85);
+  --hero-overlay-start: rgba(10, 15, 13, 0.97);
+  --hero-overlay-mid: rgba(10, 15, 13, 0.6);
+  --speakers-mid: #0c1510;
+  --emerald: #10b981;
+  --emerald-dim: #059669;
+  --emerald-glow: rgba(16, 185, 129, 0.18);
+  --emerald-border: rgba(16, 185, 129, 0.28);
+  --text: #f0faf5;
+  --text-muted: #7a9987;
+  --text-dim: #4a6457;
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+  --radius: 16px;
+  --transition-theme: background 0.35s, color 0.35s, border-color 0.35s, box-shadow 0.35s;
+}
+
+/* Light mode overrides */
+:root.light {
+  --bg: #e8eeeb;
+  --bg-card: #dfe7e3;
+  --bg-elevated: #d4dfd9;
+  --bg-nav: rgba(232, 238, 235, 0.88);
+  --bg-badge: rgba(212, 223, 217, 0.92);
+  --hero-overlay-start: rgba(232, 238, 235, 0.95);
+  --hero-overlay-mid: rgba(232, 238, 235, 0.55);
+  --speakers-mid: #cdd8d2;
+  --emerald: #0a7a56;
+  --emerald-dim: #086644;
+  --emerald-glow: rgba(10, 122, 86, 0.1);
+  --emerald-border: rgba(10, 122, 86, 0.25);
+  --text: #0d1a14;
+  --text-muted: #375c47;
+  --text-dim: #6b8f7c;
+  --border: rgba(0, 0, 0, 0.1);
+  --border-strong: rgba(0, 0, 0, 0.18);
+  --shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: var(--transition-theme);
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  background: var(--emerald);
+  color: #fff;
+  border: none;
+  padding: 0.55rem 1.4rem;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: var(--emerald-dim);
+  box-shadow: 0 0 20px var(--emerald-glow);
+}
+
+.btn-hero {
+  background: var(--emerald);
+  color: #fff;
+  border: none;
+  padding: 0.85rem 2rem;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.3);
+}
+
+.btn-hero:hover {
+  background: var(--emerald-dim);
+  transform: translateY(-1px);
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.4);
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 0.85rem 2rem;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.btn-outline {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text-muted);
+  padding: 0.8rem 2rem;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-outline:hover {
+  border-color: var(--emerald-border);
+  color: var(--emerald);
+  background: var(--emerald-glow);
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.icon-btn:hover {
+  color: var(--emerald);
+}
+
+.glow-accent {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  opacity: 0.12;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(0.7);
+  }
+}
