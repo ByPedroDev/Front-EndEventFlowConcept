@@ -32,12 +32,8 @@ const router = createRouter({
       path: '/events/:id',
       name: 'event-detail',
       component: EventDetailView,
-    },
-    {
-      path: '/b',
-      name: 'eventFlowB',
-      component: () => import('../views/EventFlowB.vue'),
-    }]
+    }
+  ]
 })
 
 export default router
