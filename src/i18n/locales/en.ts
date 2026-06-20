@@ -170,6 +170,9 @@ export default {
     attendees: 'Attendees',
     registered: 'registered',
     spotsLeft: 'Spots left',
+    dateTime: 'Date & Time',
+    capacity: 'Capacity',
+    people: 'people',
     status: {
       open: 'Open',
       published: 'Published',

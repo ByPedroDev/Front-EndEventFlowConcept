@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/vue-query'
-import { getEvents } from '../services/events'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { getEvents, createEvent } from '../services/events'
+import type { CreateEventPayload } from '../services/events'
 
 export function useEvents() {
   return useQuery({
@@ -8,6 +9,21 @@ export function useEvents() {
       const res = await getEvents()
       if (res.error) throw new Error(res.error)
       return res.data!
+    },
+  })
+}
+
+export function useCreateEvent() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: CreateEventPayload) => {
+      const res = await createEvent(payload)
+      if (res.error) throw new Error(res.error)
+      return res.data!
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] })
     },
   })
 }

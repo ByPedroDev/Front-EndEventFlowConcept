@@ -170,6 +170,9 @@ export default {
     attendees: 'Participantes',
     registered: 'inscritos',
     spotsLeft: 'Vagas restantes',
+    dateTime: 'Data e Hora',
+    capacity: 'Capacidade',
+    people: 'pessoas',
     status: {
       open: 'Aberto',
       published: 'Publicado',
