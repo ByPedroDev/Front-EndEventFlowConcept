@@ -109,7 +109,7 @@ const showPassword = ref(false)
 
 const handleLogin = () => {
   signin(
-    { email: email.value, password: password.value },
+    { email: email.value, passwd: password.value },
     { onSuccess: () => router.push('/') },
   )
 }

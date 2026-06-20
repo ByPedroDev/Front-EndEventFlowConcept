@@ -13,14 +13,18 @@ export async function client<T>(
   }
   const url = `${import.meta.env.VITE_API_URL}${endpoint}`
 
+  const token = localStorage.getItem('accessToken')
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string>),
+  }
+  if (token) headers['Authorization'] = `Bearer ${token}`
+
   try {
     const response = await fetch(url, {
       ...options,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
     })
 
     if (!response.ok) {

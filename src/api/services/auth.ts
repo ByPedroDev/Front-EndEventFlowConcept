@@ -9,7 +9,7 @@ interface SignupPayload {
 
 interface SigninPayload {
   email: string
-  password: string
+  passwd: string
 }
 
 interface SigninResponse {
@@ -18,14 +18,14 @@ interface SigninResponse {
 }
 
 export function signup(payload: SignupPayload) {
-  return client<null>('/api/v1/auth/signup', {
+  return client<null>('api/v1/auth/signup', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
 }
 
 export function signin(payload: SigninPayload) {
-  return client<SigninResponse>('/api/v1/auth/signin', {
+  return client<SigninResponse>('api/v1/auth/signin', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
