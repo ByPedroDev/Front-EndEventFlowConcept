@@ -5,6 +5,7 @@ export default {
     speakers: 'Palestrantes',
     venues: 'Locais',
     signIn: 'Entrar',
+    signOut: 'Sair',
     createEvent: 'Criar Evento',
   },
 
@@ -77,8 +78,7 @@ export default {
     back: 'Voltar ao início',
     title: 'Criar Conta',
     subtitle: 'Junte-se a milhares de criadores de eventos no mundo todo',
-    firstName: 'Nome',
-    lastName: 'Sobrenome',
+    name: 'Nome Completo',
     email: 'E-mail',
     password: 'Senha',
     confirmPassword: 'Confirmar Senha',
@@ -171,6 +171,9 @@ export default {
     attendees: 'Participantes',
     registered: 'inscritos',
     spotsLeft: 'Vagas restantes',
+    dateTime: 'Data e Hora',
+    capacity: 'Capacidade',
+    people: 'pessoas',
     status: {
       open: 'Aberto',
       published: 'Publicado',

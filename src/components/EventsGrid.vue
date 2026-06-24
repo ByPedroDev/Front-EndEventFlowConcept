@@ -22,7 +22,17 @@
       </div>
     </div>
 
-    <div class="events-grid">
+    <div v-if="isPending" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading events...</p>
+    </div>
+
+    <div v-else-if="isError" class="error-state">
+      <span class="material-symbols-outlined">error</span>
+      <p>{{ error?.message || 'Failed to load events' }}</p>
+    </div>
+
+    <div v-else class="events-grid">
       <RouterLink
         v-for="event in events"
         :key="event.id"
@@ -33,24 +43,24 @@
         @mouseleave="cancelExpand"
       >
         <div class="event-img">
-          <img :src="event.img" :alt="event.title" />
+          <img :src="event.bannerUrl" :alt="event.name" />
           <div class="event-date-badge">
-            <div class="day">{{ event.day }}</div>
-            <div class="month">{{ event.month }}</div>
+            <div class="day">{{ getDay(event.startsAt) }}</div>
+            <div class="month">{{ getMonth(event.startsAt) }}</div>
           </div>
-          <div class="event-cat-badge">{{ event.category }}</div>
+          <div class="event-cat-badge">{{ event.status }}</div>
         </div>
 
         <div class="event-body">
-          <div class="event-title">{{ event.title }}</div>
+          <div class="event-title">{{ event.name }}</div>
           <div class="event-desc">{{ event.description }}</div>
 
           <div class="event-footer">
             <div class="event-meta">
-              <span class="material-symbols-outlined">location_on</span>{{ event.location }}
+              <span class="material-symbols-outlined">location_on</span>{{ event.address }}
             </div>
             <div class="event-meta">
-              <span class="material-symbols-outlined">group</span>{{ event.attendees }}
+              <span class="material-symbols-outlined">group</span>{{ event.maxParticipants }}
             </div>
           </div>
 
@@ -68,23 +78,24 @@
               <div class="expanded-stat">
                 <span class="material-symbols-outlined">schedule</span>
                 <div>
-                  <span class="stat-label">{{ $t('events.duration') }}</span>
-                  <span class="stat-value">{{ event.duration }}</span>
+                  <span class="stat-label">Date</span>
+                  <span class="stat-value">{{ formatDate(event.startsAt) }} — {{ formatDate(event.endsAt) }}</span>
                 </div>
               </div>
               <div class="expanded-stat">
-                <span class="material-symbols-outlined">confirmation_number</span>
+                <span class="material-symbols-outlined">group</span>
                 <div>
-                  <span class="stat-label">{{ $t('events.price') }}</span>
-                  <span class="stat-value">{{ event.price }}</span>
+                  <span class="stat-label">Capacity</span>
+                  <span class="stat-value">{{ event.maxParticipants }} participants</span>
                 </div>
               </div>
             </div>
 
-            <div class="expanded-speakers">
-              <span class="stat-label">{{ $t('events.speakers') }}</span>
-              <div class="speaker-chips">
-                <span v-for="s in event.speakers" :key="s" class="speaker-chip">{{ s }}</span>
+            <div class="expanded-status">
+              <span class="material-symbols-outlined">info</span>
+              <div>
+                <span class="stat-label">Status</span>
+                <span class="stat-value status-{{ event.status.toLowerCase() }}">{{ event.status }}</span>
               </div>
             </div>
 
@@ -96,10 +107,6 @@
         </div>
       </RouterLink>
     </div>
-
-    <div class="load-more-wrap">
-      <button class="btn-outline">{{ $t('events.loadMore') }}</button>
-    </div>
   </section>
 </template>
 
@@ -107,115 +114,32 @@
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useEvents } from '@/api/composables/useEvents'
 
 const { t: $t } = useI18n()
 
-interface Event {
-  id: number
-  title: string
-  category: string
-  description: string
-  location: string
-  attendees: string
-  day: string
-  month: string
-  img: string
-  duration: string
-  price: string
-  speakers: string[]
+const { data: events, isPending, isError, error } = useEvents()
+
+function getDay(iso: string) {
+  return new Date(iso).getDate().toString()
 }
 
-const events: Event[] = [
-  {
-    id: 1,
-    title: 'Advanced Design Systems Workshop',
-    category: 'Workshop',
-    description: 'Master the art of creating scalable components and tokens for enterprise SaaS products.',
-    location: 'Creative Hub, Berlin',
-    attendees: '120+',
-    day: '24',
-    month: 'OCT',
-    duration: '2 days',
-    price: '€ 299',
-    speakers: ['Sarah Lin', 'Marc Dubois'],
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVEXg69OmBIJtNR3IqF1IkrG0CPH2_0Af1rDEpfFzWn9voZFzWNCB1R5POLYYpbboBouxizZ8P6k4NHTrZak33yii-oVxOMssEdiOAqlggWHEKK0KSCR4KELWJJlFRHDKvRQbxMXsYMNx_IperD-GBqzD234n5XE_5T0lF4ARrRe1kPMoCD-nOvd6Bu7lGC1qS91FL0thAzJG0VQSA4Np-Zyq76T4xIdeuuTAMt-h3O8UIDUTRvSJZTCzeST24FFlnIgTJ9CTYJL4W',
-  },
-  {
-    id: 2,
-    title: 'Digital Arts & Music Expo',
-    category: 'Festival',
-    description: 'A sensory journey blending immersive digital installations with global electronic sounds.',
-    location: 'Sonar Dome, Barcelona',
-    attendees: '2.5k',
-    day: '12',
-    month: 'NOV',
-    duration: '3 days',
-    price: '€ 120',
-    speakers: ['DJ Hana', 'Collective B', 'Ariel Moss'],
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnprHnhI17hC3LiratNtLycBIVDQkMPpemyQu_MIyksZ3O5E4hl9uyYPsE08h-ddOJSdF8Bomk5wHmYdkInUp9sBSKqCYbtng6GQPM778EwNkKx1zwgjn6JZpTsbc4orZMKpFJIsYxB7b0pHvzigLY1Vkvptnz4XLsgmzQd0vauHmJfSRkC9R7_KjLA2pPy-twxAGgk_yjEFSCLpRyt_wM_Ol3_AVSkURz476RK9C9De6YBnhMY2ow5p8QFt-Bb-yJkKzhCv1NnNeG',
-  },
-  {
-    id: 3,
-    title: 'Executive Leadership Summit',
-    category: 'Conference',
-    description: 'Strategic insights for the next generation of C-suite executives and change makers.',
-    location: 'The Ritz, London',
-    attendees: '450',
-    day: '05',
-    month: 'DEC',
-    duration: '1 day',
-    price: '£ 850',
-    speakers: ['Emma Clarke', 'Tom Reed'],
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC0EsVhNFiWT3J7WpYLxmSsuv8-P65nhn0BBap0n0getaLzYtO20RyZElA30hjaWsV_ArRUP_VEXAu2Lu_TbwPLpfDaf5WmoPnMXoFOMPGitWcFzN4BQx6CkHmHHrTiqZlpk0Ep2M8uUIvpVB-SP-kNuEmxBA5DW0HuHfnFUiyZNry9JlYFg6ad4gFz2UXCe-63xzbXaGjgxn7DUH8JoVCF1pZBa3SGiI962Mp7pnSd1gPAB65MSK52Iovms1qxfuu3xhRfdIf0aJkI',
-  },
-  {
-    id: 4,
-    title: "Founder's Supper Club",
-    category: 'Networking',
-    description: 'An intimate evening of peer-to-peer networking over curated culinary experiences.',
-    location: 'SOHO House, NYC',
-    attendees: '25',
-    day: '18',
-    month: 'JAN',
-    duration: '4 hours',
-    price: '$ 180',
-    speakers: ['Alex Vega', 'Rina Park'],
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAOtsljKnV__vIzi1tQZ442lzSofmbhfovLTbHd1qpASPEbXUhVqNhm3WAnf5dAY5yScY6Jld3borL5HU4lYqmb0qnc-ugwSe9OqvUXMUT8YFWGaYbMhl_ip6BSSQDps1hqXG7zh2msTFQ9na7SZxkhspkdag4gC2pFQzlx84BslzXrFJ-APF9_d0Igrcb4j2jNiS4ElBhs5fKCi-0hoZ1C-NisIYYcKTW2B8MtH8wYXOpodnFNe2R0BPDBOoz',
-  },
-  {
-    id: 5,
-    title: 'Startup of the Year Awards',
-    category: 'Celebration',
-    description: 'Celebrating the most innovative startups and disruptive technologies of the season.',
-    location: 'Sky Garden, Seoul',
-    attendees: '800',
-    day: '02',
-    month: 'FEB',
-    duration: '5 hours',
-    price: 'Free',
-    speakers: ['Ji-won Oh', 'Nadia Santos', 'Luca Ferrari'],
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDgPxSVs1N7xDQRwybwo6MRhWBsIoVQIzGKy45fogShQG1WI-AjkQOg8ZxRjP6qM7kF7RX78T_16gvYHToLgxBqylPHDMFX5P9nL5Vw7rmCK97moxiGo1aZcUGu_7X-7asYb9DGFixDQEq-QlhULAzhMCOZqhcYAlkDzwyhrUFYxnKcLN7YoMhrg3QIvQz1ayY1zNBOd8cpNI_gMGzKpMAwRYepbCFVNiznM-s1sV9mY4ZeszA7ZjPMmG5lfokpW_y0hzDY4ZN7ZvTH',
-  },
-  {
-    id: 6,
-    title: 'Product Strategy Bootcamp',
-    category: 'Learning',
-    description: 'Intensive 3-day workshop on building high-growth products that users love.',
-    location: 'WeWork, San Francisco',
-    attendees: '75',
-    day: '15',
-    month: 'MAR',
-    duration: '3 days',
-    price: '$ 499',
-    speakers: ['Chris Yang', 'Mia Torres'],
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDIHV4UePuMCdBc76zqStUcbX17Nv-o9Sg6ddwYDTnb_uroFWDJnVYRC69SZJ39RouXC71JHXY3xJ8ItJVrWngd4rmYIfqV7Ff9qaxM2h2phcE_cYo-Vvs8rEXpjxyD72FF6desc8BwLcSYiVPxfbQ3tiAgfiYGqAAkz9GhJ0tsuIS6n85Xu3KNPFbpgdcBTQ10cjkxwWUqYy0d1hO_isAk5AH9HQBV7pqI6GN_eN_TRfIhV52me-W9sVe8BFoi8HhkEoE13C_ioWci',
-  },
-]
+function getMonth(iso: string) {
+  return new Date(iso).toLocaleString('en-US', { month: 'short' }).toUpperCase()
+}
 
-const expandedId = ref<number | null>(null)
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+const expandedId = ref<string | null>(null)
 let hoverTimer: ReturnType<typeof setTimeout> | null = null
 
-function startExpand(id: number) {
+function startExpand(id: string) {
   hoverTimer = setTimeout(() => {
     expandedId.value = id
   }, 600)
@@ -503,26 +427,6 @@ function cancelExpand() {
   color: var(--text);
 }
 
-.expanded-speakers {
-  padding-bottom: 0.8rem;
-}
-
-.speaker-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.4rem;
-}
-
-.speaker-chip {
-  padding: 0.2rem 0.65rem;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
 .expanded-cta {
   display: flex;
   align-items: center;
@@ -539,5 +443,50 @@ function cancelExpand() {
 .load-more-wrap {
   text-align: center;
   margin-top: 3rem;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  color: var(--text-muted);
+  gap: 1rem;
+}
+
+.error-state .material-symbols-outlined {
+  font-size: 2rem;
+  color: #ef4444;
+}
+
+.loading-state .spinner,
+.spinner {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--emerald);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.expanded-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  padding-bottom: 0.8rem;
+}
+
+.expanded-status .material-symbols-outlined {
+  font-size: 1rem;
+  color: var(--emerald);
+  flex-shrink: 0;
 }
 </style>

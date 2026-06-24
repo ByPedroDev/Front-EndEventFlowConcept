@@ -17,6 +17,8 @@
         <p class="subtitle">{{ $t('login.subtitle') }}</p>
 
         <form @submit.prevent="handleLogin">
+          <p v-if="signinError" class="error-msg">{{ signinError.message }}</p>
+
           <div class="form-group">
             <label for="email">{{ $t('login.email') }}</label>
             <div class="input-wrap">
@@ -58,9 +60,10 @@
             <a href="#" class="forgot-link">{{ $t('login.forgotPassword') }}</a>
           </div>
 
-          <button type="submit" class="btn-login">
-            {{ $t('login.signIn') }}
-            <span class="material-symbols-outlined">arrow_forward</span>
+          <button type="submit" class="btn-login" :disabled="isPending">
+            <span v-if="isPending" class="spinner"></span>
+            {{ isPending ? 'Signing in...' : $t('login.signIn') }}
+            <span v-if="!isPending" class="material-symbols-outlined">arrow_forward</span>
           </button>
         </form>
 
@@ -90,10 +93,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useSignin } from '@/api/composables/useAuth'
 
 const { t: $t } = useI18n()
+const router = useRouter()
+
+const { mutate: signin, isPending, error: signinError } = useSignin()
 
 const email = ref('')
 const password = ref('')
@@ -101,7 +108,10 @@ const rememberMe = ref(false)
 const showPassword = ref(false)
 
 const handleLogin = () => {
-  console.log('Login attempt:', { email: email.value, rememberMe: rememberMe.value })
+  signin(
+    { email: email.value, passwd: password.value },
+    { onSuccess: () => router.push('/') },
+  )
 }
 </script>
 
@@ -343,6 +353,33 @@ label {
   background: var(--emerald-dim);
   transform: translateY(-1px);
   box-shadow: 0 0 40px rgba(16, 185, 129, 0.45);
+}
+
+.error-msg {
+  color: #ef4444;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-login .material-symbols-outlined {

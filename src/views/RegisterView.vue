@@ -17,34 +17,20 @@
         <p class="subtitle">{{ $t('register.subtitle') }}</p>
 
         <form @submit.prevent="handleRegister">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="firstName">{{ $t('register.firstName') }}</label>
-              <div class="input-wrap">
-                <span class="material-symbols-outlined input-icon">person</span>
-                <input
-                  id="firstName"
-                  v-model="form.firstName"
-                  type="text"
-                  placeholder="John"
-                  required
-                  class="form-input"
-                />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="lastName">{{ $t('register.lastName') }}</label>
-              <div class="input-wrap">
-                <span class="material-symbols-outlined input-icon">person</span>
-                <input
-                  id="lastName"
-                  v-model="form.lastName"
-                  type="text"
-                  placeholder="Doe"
-                  required
-                  class="form-input"
-                />
-              </div>
+          <p v-if="signupError" class="error-msg">{{ signupError.message }}</p>
+
+          <div class="form-group">
+            <label for="name">{{ $t('register.name') }}</label>
+            <div class="input-wrap">
+              <span class="material-symbols-outlined input-icon">person</span>
+              <input
+                id="name"
+                v-model="form.name"
+                type="text"
+                placeholder="John Doe"
+                required
+                class="form-input"
+              />
             </div>
           </div>
 
@@ -112,9 +98,10 @@
             </span>
           </label>
 
-          <button type="submit" class="btn-register" :disabled="passwordMismatch || !form.terms">
-            {{ $t('register.createAccount') }}
-            <span class="material-symbols-outlined">arrow_forward</span>
+          <button type="submit" class="btn-register" :disabled="passwordMismatch || !form.terms || isPending">
+            <span v-if="isPending" class="spinner"></span>
+            {{ isPending ? 'Creating account...' : $t('register.createAccount') }}
+            <span v-if="!isPending" class="material-symbols-outlined">arrow_forward</span>
           </button>
         </form>
 
@@ -151,15 +138,18 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import PasswordStrength from '@/components/PasswordStrength.vue'
+import { useSignup } from '@/api/composables/useAuth'
 
 const { t: $t } = useI18n()
+const router = useRouter()
+
+const { mutate: signup, isPending, error: signupError } = useSignup()
 
 const form = ref({
-  firstName: '',
-  lastName: '',
+  name: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -175,7 +165,10 @@ const passwordMismatch = computed(
 
 const handleRegister = () => {
   if (passwordMismatch.value) return
-  console.log('Register:', form.value)
+  signup(
+    { name: form.value.name, email: form.value.email, password: form.value.password },
+    { onSuccess: () => router.push('/login') },
+  )
 }
 </script>
 
@@ -424,6 +417,27 @@ label {
 .btn-register:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+
+.error-msg {
+  color: #ef4444;
+  font-size: 0.85rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .btn-register .material-symbols-outlined {

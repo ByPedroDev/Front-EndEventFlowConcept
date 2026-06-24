@@ -175,41 +175,16 @@
               </div>
             </div>
             <div class="fields">
-              <!-- File upload -->
               <div class="form-group">
                 <label>{{ $t('createEvent.fields.eventBanner') }}</label>
-                <div
-                  class="file-drop"
-                  :class="{ 'has-file': bannerPreview, dragging: isDragging }"
-                  @dragover.prevent="isDragging = true"
-                  @dragleave="isDragging = false"
-                  @drop.prevent="onDrop"
-                  @click="fileInput?.click()"
-                >
+                <div class="input-wrap">
+                  <span class="material-symbols-outlined input-icon">image</span>
                   <input
-                    ref="fileInput"
-                    type="file"
-                    accept="image/*"
-                    style="display: none"
-                    @change="onFileChange"
+                    v-model="form.banner_url"
+                    type="url"
+                    placeholder="https://example.com/banner.jpg"
+                    class="form-input"
                   />
-                  <Transition name="fade" mode="out-in">
-                    <div v-if="bannerPreview" key="preview" class="file-preview">
-                      <img :src="bannerPreview" alt="Banner preview" />
-                      <button class="remove-banner" @click.stop="removeBanner">
-                        <span class="material-symbols-outlined">close</span>
-                      </button>
-                      <div class="preview-overlay">
-                        <span class="material-symbols-outlined">photo_camera</span>
-                        {{ $t('createEvent.fields.changeBanner') }}
-                      </div>
-                    </div>
-                    <div v-else key="placeholder" class="file-placeholder">
-                      <span class="material-symbols-outlined upload-icon">cloud_upload</span>
-                      <p>Drag & drop or <span class="link-text">browse</span></p>
-                      <span class="file-hint">PNG, JPG up to 10MB</span>
-                    </div>
-                  </Transition>
                 </div>
               </div>
 
@@ -245,8 +220,8 @@
               </div>
             </div>
             <div class="review-grid">
-              <div v-if="bannerPreview" class="review-banner">
-                <img :src="bannerPreview" alt="Banner" />
+              <div v-if="form.banner_url" class="review-banner">
+                <img :src="form.banner_url" alt="Banner" />
               </div>
               <div class="review-items">
                 <div class="review-item">
@@ -309,10 +284,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { useCreateEvent } from '@/api/composables/useEvents'
 
 const { t: $t } = useI18n()
+const router = useRouter()
+const { mutate: createEvent, isPending: isCreating } = useCreateEvent()
 
 const steps = computed(() => [
   { label: $t('createEvent.steps.about') },
@@ -338,14 +316,11 @@ const form = ref({
   starts_at: '',
   ends_at: '',
   status: 'draft',
-  banner_url: null as File | null,
+  banner_url: '',
 })
 
 const currentStep = ref(0)
 const slideRight = ref(false)
-const bannerPreview = ref<string | null>(null)
-const isDragging = ref(false)
-const fileInput = ref<HTMLInputElement | null>(null)
 
 const progressWidth = computed(() => {
   if (steps.value.length <= 1) return '0%'
@@ -378,28 +353,6 @@ function goToStep(i: number) {
   currentStep.value = i
 }
 
-function onFileChange(e: Event) {
-  const file = (e.target as HTMLInputElement).files?.[0]
-  if (file) setFile(file)
-}
-
-function onDrop(e: DragEvent) {
-  isDragging.value = false
-  const file = e.dataTransfer?.files?.[0]
-  if (file && file.type.startsWith('image/')) setFile(file)
-}
-
-function setFile(file: File) {
-  form.value.banner_url = file
-  bannerPreview.value = URL.createObjectURL(file)
-}
-
-function removeBanner() {
-  form.value.banner_url = null
-  bannerPreview.value = null
-  if (fileInput.value) fileInput.value.value = ''
-}
-
 function formatDate(dt: string) {
   if (!dt) return '—'
   return new Date(dt).toLocaleString('en-US', {
@@ -409,8 +362,20 @@ function formatDate(dt: string) {
 }
 
 function handleSubmit() {
-  console.log('Submit event:', form.value)
-  // TODO: integrate with backend
+  if (!form.value.nome || !form.value.descricao || !form.value.endereco || !form.value.starts_at || !form.value.ends_at) return
+
+  createEvent({
+    name: form.value.nome,
+    description: form.value.descricao,
+    address: form.value.endereco,
+    maxParticipants: form.value.max_participants ?? 0,
+    startsAt: new Date(form.value.starts_at).toISOString(),
+    endsAt: new Date(form.value.ends_at).toISOString(),
+    status: form.value.status,
+    bannerUrl: form.value.banner_url,
+  }, {
+    onSuccess: () => router.push('/'),
+  })
 }
 </script>
 
@@ -734,107 +699,6 @@ label {
 
 .duration-badge .material-symbols-outlined { font-size: 1rem; }
 
-/* ── File drop ── */
-.file-drop {
-  border: 2px dashed var(--border-strong);
-  border-radius: 16px;
-  min-height: 180px;
-  cursor: pointer;
-  transition: all 0.25s;
-  overflow: hidden;
-  position: relative;
-}
-
-.file-drop:hover,
-.file-drop.dragging {
-  border-color: var(--emerald-border);
-  background: var(--emerald-glow);
-}
-
-.file-drop.has-file {
-  border-style: solid;
-  border-color: var(--emerald-border);
-}
-
-.file-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  height: 180px;
-  color: var(--text-muted);
-}
-
-.upload-icon {
-  font-size: 2.5rem !important;
-  color: var(--text-dim);
-  transition: color 0.2s, transform 0.2s;
-}
-
-.file-drop:hover .upload-icon,
-.file-drop.dragging .upload-icon {
-  color: var(--emerald);
-  transform: translateY(-4px);
-}
-
-.file-placeholder p { font-size: 0.9rem; font-weight: 500; }
-.link-text { color: var(--emerald); font-weight: 600; }
-.file-hint { font-size: 0.75rem; color: var(--text-dim); }
-
-.file-preview {
-  position: relative;
-  width: 100%;
-  height: 220px;
-}
-
-.file-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.preview-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.4rem;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.preview-overlay .material-symbols-outlined { font-size: 1.5rem; }
-.file-preview:hover .preview-overlay { opacity: 1; }
-
-.remove-banner {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.7);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  transition: background 0.2s;
-}
-
-.remove-banner .material-symbols-outlined { font-size: 1rem; }
-.remove-banner:hover { background: rgba(239,68,68,0.8); }
-
 /* ── Status options ── */
 .status-options {
   display: flex;
@@ -910,6 +774,8 @@ label {
   height: 100%;
   object-fit: cover;
 }
+
+
 
 .review-items {
   display: flex;
@@ -1053,9 +919,6 @@ label {
 .step-content.slide-right {
   animation-name: step-slide-right;
 }
-
-.fade-enter-active, .fade-leave-active { transition: opacity 0.25s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
 
 /* ── Mobile ── */
 @media (max-width: 640px) {

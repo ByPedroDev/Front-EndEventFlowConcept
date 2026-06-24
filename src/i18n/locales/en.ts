@@ -5,6 +5,7 @@ export default {
     speakers: 'Speakers',
     venues: 'Venues',
     signIn: 'Sign In',
+    signOut: 'Sign Out',
     createEvent: 'Create Event',
   },
 
@@ -77,8 +78,7 @@ export default {
     back: 'Back to home',
     title: 'Create Account',
     subtitle: 'Join thousands of event creators worldwide',
-    firstName: 'First Name',
-    lastName: 'Last Name',
+    name: 'Name',
     email: 'Email',
     password: 'Password',
     confirmPassword: 'Confirm Password',
@@ -171,6 +171,9 @@ export default {
     attendees: 'Attendees',
     registered: 'registered',
     spotsLeft: 'Spots left',
+    dateTime: 'Date & Time',
+    capacity: 'Capacity',
+    people: 'people',
     status: {
       open: 'Open',
       published: 'Published',

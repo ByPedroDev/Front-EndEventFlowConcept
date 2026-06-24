@@ -17,7 +17,10 @@
         <button class="theme-toggle" @click="toggle" :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'">
           <span class="theme-emoji">{{ isDark ? '🌙' : '☀️' }}</span>
         </button>
-        <RouterLink to="/login" class="btn-signin desktop-only">{{ $t('nav.signIn') }}</RouterLink>
+        <template v-if="isAuthenticated">
+          <button class="btn-signin desktop-only" @click="handleLogout">{{ $t('nav.signOut') || 'Sign Out' }}</button>
+        </template>
+        <RouterLink v-else to="/login" class="btn-signin desktop-only">{{ $t('nav.signIn') }}</RouterLink>
         <RouterLink to="/create-event" class="btn-primary desktop-only">{{ $t('nav.createEvent') }}</RouterLink>
         <button class="icon-btn desktop-only">
           <span class="material-symbols-outlined">notifications</span>
@@ -49,7 +52,10 @@
           <a href="#" @click="menuOpen = false">{{ $t('nav.venues') }}</a>
         </nav>
         <div class="drawer-actions">
-          <RouterLink to="/login" class="btn-signin-full" @click="menuOpen = false">{{ $t('nav.signIn') }}</RouterLink>
+          <template v-if="isAuthenticated">
+            <button class="btn-signin-full" @click="handleLogoutMobile">{{ $t('nav.signOut') || 'Sign Out' }}</button>
+          </template>
+          <RouterLink v-else to="/login" class="btn-signin-full" @click="menuOpen = false">{{ $t('nav.signIn') }}</RouterLink>
           <RouterLink to="/create-event" class="btn-primary-full" @click="menuOpen = false">{{ $t('nav.createEvent') }}</RouterLink>
           <button class="lang-toggle-full" @click="toggleLocale">
             {{ currentLocale === 'pt' ? '🌐 English' : '🌐 Português' }}
@@ -62,15 +68,29 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useTheme } from '@/composables/useTheme'
 import { setLocale } from '@/i18n'
+import { useAuthToken, clearStoredToken } from '@/api/composables/useAuth'
 
+const router = useRouter()
 const { isDark, toggle } = useTheme()
 const { t: $t, locale } = useI18n()
+const { isAuthenticated } = useAuthToken()
 const menuOpen = ref(false)
 const hidden = ref(false)
+
+function handleLogout() {
+  clearStoredToken()
+  router.push('/')
+}
+
+function handleLogoutMobile() {
+  menuOpen.value = false
+  clearStoredToken()
+  router.push('/')
+}
 
 const currentLocale = computed(() => locale.value)
 function toggleLocale() {
